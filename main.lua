@@ -91,16 +91,6 @@ VisualsSection:AddButton({
     end
 })
 
-HacksSelection:AddButton({
-    Name = "AimBot",
-    Callback = function()
-	OrionLib:MakeNotification({
-		Name = "AimBot",
-	        Content = "АимБот работает при зажатии колесика МЫШИ",
-	        Time = 3
-	});
-    end
-})
 HacksSection:AddButton({
     Name = "Delete Doors and Gates",
     Callback = function ()
@@ -257,6 +247,7 @@ while true do
     end;
     playerDropdown:Refresh(playersTable, true);
 end;
+
 local Players = game:GetService("Players")
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -267,15 +258,6 @@ local PLAYER = Players.LocalPlayer
 local aimFov = 200 -- Радиус области, где аимбот будет искать противников
 local aimPart = "Head" -- Часть тела, на которую будет происходить прицеливание
 local aimEnabled = false -- Переключатель состояния аимбота
-
--- Создание круга для отображения FOV
-local fovCircle = Drawing.new("Circle")
-fovCircle.Color = Color3.fromRGB(255, 0, 0) -- Цвет круга (красный)
-fovCircle.Thickness = 1
-fovCircle.NumSides = 50 -- Количество сторон круга
-fovCircle.Transparency = 0.5
-fovCircle.Visible = false -- Скрываем круг изначально
-fovCircle.Radius = aimFov -- Радиус круга
 
 -- Функция нахождения ближайшего противника
 local function getClosestPlayerToMouse()
@@ -332,4 +314,5 @@ RunService.RenderStepped:Connect(function()
         aimAtTarget(closestPlayer)
     end
 end)
+
 
