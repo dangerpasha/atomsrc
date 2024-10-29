@@ -268,6 +268,15 @@ local aimFov = 200 -- Радиус области, где аимбот буде�
 local aimPart = "Head" -- Часть тела, на которую будет происходить прицеливание
 local aimEnabled = false -- Переключатель состояния аимбота
 
+-- Создание круга для отображения FOV
+local fovCircle = Drawing.new("Circle")
+fovCircle.Color = Color3.fromRGB(255, 0, 0) -- Цвет круга (красный)
+fovCircle.Thickness = 1
+fovCircle.NumSides = 50 -- Количество сторон круга
+fovCircle.Transparency = 0.5
+fovCircle.Visible = false -- Скрываем круг изначально
+fovCircle.Radius = aimFov -- Радиус круга
+
 -- Функция нахождения ближайшего противника
 local function getClosestPlayerToMouse()
     local closestPlayer = nil
