@@ -94,79 +94,69 @@ VisualsSection:AddButton({
 HacksSection:AddButton({
     Name = "Aimbot",
     Callback = function ()
-        local PLAYER = game.Players.LocalPlayer
-        local CurrentCam = game.Workspace.CurrentCamera
-        local UIS = game:GetService("User InputService")
-        local WorldToViewportPoint = CurrentCam.WorldToViewportPoint
-        local mouseLocation = UIS.GetMouseLocation
+	local UIS = game:GetService("UserInputService")
+local CurrentCam = Workspace.CurrentCamera
+local PLAYER = Players.LocalPlayer
 
-        local function isVisible(p, ...)
-            if not (DeleteMob.Aimbot.WallCheck == true) then
-                return true
-            end
-            return #CurrentCam:GetPartsObscuringTarget({ p }, { CurrentCam, PLAYER.Character, ... }) == 0 
-        end
+-- Настройки для аимбота
+local aimFov = 200 -- Радиус области, где аимбот будет искать противников
+local aimPart = "Head" -- Часть тела, на которую будет происходить прицеливание
+local aimEnabled = false -- Переключатель состояния аимбота
 
-        function CameraGetClosestToMouse(Fov)
-            local AimFov = Fov
-            local targetPos = nil
+-- Функция нахождения ближайшего противника
+local function getClosestPlayerToMouse()
+    local closestPlayer = nil
+    local shortestDistance = aimFov
 
-            for i, v in pairs(game:GetService("Players"):GetPlayers()) do
-                if v ~= PLAYER then
-                    if DeleteMob.Aimbot.TeamCheck == true then
-                        if v.Character and v.Character:FindFirstChild(DeleteMob.Aimbot.AimPart) and v.Character.Humanoid and v.Character.Humanoid.Health > 0 and not (v.Team == PLAYER.Team) then
-                            local screen_pos, on_screen = WorldToViewportPoint(CurrentCam, v.Character[DeleteMob.Aimbot.AimPart].Position)
-                            local screen_pos_2D = Vector2.new(screen_pos.X, screen_pos.Y)
-                            local new_magnitude = (screen_pos_2D - mouseLocation(UIS)).Magnitude
-                            if on_screen and new_magnitude < AimFov and isVisible(v.Character[DeleteMob.Aimbot.AimPart].Position, v.Character.Head.Parent) then
-                                AimFov = new_magnitude
-                                targetPos = v
-                            end
-                        end
-                    else
-                        if v.Character and v.Character:FindFirstChild(DeleteMob.Aimbot.AimPart) and v.Character.Humanoid and v.Character.Humanoid.Health > 0 then
-                            local screen_pos, on_screen = WorldToViewportPoint(CurrentCam, v.Character[DeleteMob.Aimbot.AimPart].Position)
-                            local screen_pos_2D = Vector2.new(screen_pos.X, screen_pos.Y)
-                            local new_magnitude = (screen_pos_2D - mouseLocation(UIS)).Magnitude
-                            if on_screen and new_magnitude < AimFov and isVisible(v.Character[DeleteMob.Aimbot.AimPart].Position, v.Character.Head.Parent) then
-                                AimFov = new_magnitude
-                                targetPos = v
-                            end
-                        end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= PLAYER and player.Team ~= PLAYER.Team then
+            local character = player.Character
+            if character and character:FindFirstChild(aimPart) and character.Humanoid.Health > 0 then
+                local screenPos, onScreen = CurrentCam:WorldToViewportPoint(character[aimPart].Position)
+                if onScreen then
+                    local mousePos = UIS:GetMouseLocation()
+                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                    if distance < shortestDistance then
+                        closestPlayer = player
+                        shortestDistance = distance
                     end
-                end
-            end
-            return targetPos
-        end
-
-        local function aimAt(pos, smooth)
-            local AimPart = pos.Character:FindFirstChild(DeleteMob.Aimbot.AimPart)
-            if AimPart then
-                local LookAt = nil
-                local Distance = math.floor(0.5 + (PLAYER.Character:FindFirstChild("HumanoidRootPart").Position - pos.Character:FindFirstChild("HumanoidRootPart").Position).magnitude)
-                if Distance > 100 then
-                    local distChangeBig = Distance / 10
-                    LookAt = CurrentCam.CFrame:PointToWorldSpace(Vector3.new(0, 0, -smooth * distChangeBig)):Lerp(AimPart.Position, .01)
-                else
-                    local distChangeSmall = Distance / 10
-                    LookAt = CurrentCam.CFrame:PointToWorldSpace(Vector3.new(0, 0, -smooth * distChangeSmall)):Lerp(AimPart.Position, .01)
-                end
-                CurrentCam.CFrame = CFrame.lookAt(CurrentCam.CFrame.Position, LookAt)
-            end
-        end
-
-        -- Aimbot loop
-        while DeleteMob.Aimbot.Enabled do
-            wait(0)
-            if DeleteMob.Aimbot.IsAimKeyDown then
-                local _pos = CameraGetClosestToMouse(DeleteMob.Aimbot.Fov)
-                if _pos then
-                    aimAt(_pos, DeleteMob.Aimbot.Smoothing)
                 end
             end
         end
     end
-})
+    return closestPlayer
+end
+
+-- Функция наведения на выбранную цель
+local function aimAtTarget(target)
+    if target and target.Character then
+        local targetPart = target.Character:FindFirstChild(aimPart)
+        if targetPart then
+            CurrentCam.CFrame = CFrame.lookAt(CurrentCam.CFrame.Position, targetPart.Position)
+        end
+    end
+end
+
+-- Обработчик нажатия колесика мыши
+UIS.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton3 then
+        aimEnabled = true
+        while aimEnabled do
+            local closestPlayer = getClosestPlayerToMouse()
+            aimAtTarget(closestPlayer)
+            wait(0.01)
+        end
+    end
+end)
+
+-- Отключение аимбота при отпускании колесика мыши
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton3 then
+        aimEnabled = false
+    end
+end)
+
+});
 
 HacksSection:AddButton({
     Name = "Delete Doors and Gates",
