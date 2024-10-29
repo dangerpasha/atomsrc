@@ -140,7 +140,8 @@ HacksSection:AddButton({
             aimAtTarget(closestPlayer)
         end
     end
-});
+})
+
 
 
 HacksSection:AddButton({
