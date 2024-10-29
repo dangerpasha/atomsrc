@@ -91,58 +91,6 @@ VisualsSection:AddButton({
     end
 })
 
-HacksSection:AddButton({
-    Name = "AimBot",
-    Callback = function()
-        local aimFov = 200 -- Радиус обзора для аимбота
-        local aimPart = "Head" -- Часть тела, на которую будет происходить прицеливание
-        local PLAYER = game.Players.LocalPlayer
-        local CurrentCam = game.Workspace.CurrentCamera
-        local UIS = game:GetService("UserInputService")
-
-        -- Функция нахождения ближайшего противника
-        local function getClosestPlayerToMouse()
-            local closestPlayer = nil
-            local shortestDistance = aimFov
-
-            for _, player in pairs(game.Players:GetPlayers()) do
-                if player ~= PLAYER and player.Team ~= PLAYER.Team then
-                    local character = player.Character
-                    if character and character:FindFirstChild(aimPart) and character.Humanoid.Health > 0 then
-                        local screenPos, onScreen = CurrentCam:WorldToViewportPoint(character[aimPart].Position)
-                        if onScreen then
-                            local mousePos = UIS:GetMouseLocation()
-                            local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                            if distance < shortestDistance then
-                                closestPlayer = player
-                                shortestDistance = distance
-                            end
-                        end
-                    end
-                end
-            end
-            return closestPlayer
-        end
-
-        -- Функция наведения на выбранную цель
-        local function aimAtTarget(target)
-            if target and target.Character then
-                local targetPart = target.Character:FindFirstChild(aimPart)
-                if targetPart then
-                    CurrentCam.CFrame = CFrame.lookAt(CurrentCam.CFrame.Position, targetPart.Position)
-                end
-            end
-        end
-
-        -- Запуск аимбота
-        local closestPlayer = getClosestPlayerToMouse()
-        if closestPlayer then
-            aimAtTarget(closestPlayer)
-        end
-    end
-})
-
-
 
 HacksSection:AddButton({
     Name = "Delete Doors and Gates",
