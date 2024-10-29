@@ -2,8 +2,8 @@ local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/dan
 
 OrionLib:MakeNotification({
 	Name = "atomclient",
-	Content = "Добро пожаловать! АимБот всегда включен, но наводится при затажии колесика Мыши",
-	Time = 9
+	Content = "Добро пожаловать! АимБот работает при зажатии колесика мыши.",
+	Time = 6
 });
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
