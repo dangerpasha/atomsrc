@@ -91,7 +91,77 @@ VisualsSection:AddButton({
     end
 })
 
+HacksSelection:AddButton({
+    Name = "AimBot",
+    Callback = function()
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CurrentCam = Workspace.CurrentCamera
+local PLAYER = Players.LocalPlayer
 
+-- Настройки для аимбота
+local aimFov = 200 -- Радиус области, где аимбот будет искать противников
+local aimPart = "Head" -- Часть тела, на которую будет происходить прицеливание
+local aimEnabled = false -- Переключатель состояния аимбота
+
+-- Функция нахождения ближайшего противника
+local function getClosestPlayerToMouse()
+    local closestPlayer = nil
+    local shortestDistance = aimFov
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= PLAYER and player.Team ~= PLAYER.Team then
+            local character = player.Character
+            if character and character:FindFirstChild(aimPart) and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
+                local screenPos, onScreen = CurrentCam:WorldToViewportPoint(character[aimPart].Position)
+                if onScreen then
+                    local mousePos = UIS:GetMouseLocation()
+                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                    if distance < shortestDistance then
+                        closestPlayer = player
+                        shortestDistance = distance
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- Функция наведения на выбранную цель
+local function aimAtTarget(target)
+    if target and target.Character then
+        local targetPart = target.Character:FindFirstChild(aimPart)
+        if targetPart then
+            CurrentCam.CFrame = CFrame.new(CurrentCam.CFrame.Position, targetPart.Position)
+        end
+    end
+end
+
+-- Обработчик нажатия колесика мыши
+UIS.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton3 then
+        aimEnabled = true
+    end
+end)
+
+-- Отключение аимбота при отпускании колесика мыши
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton3 then
+        aimEnabled = false
+    end
+end)
+
+-- Основной цикл, который обновляет прицеливание
+RunService.RenderStepped:Connect(function()
+    if aimEnabled then
+        local closestPlayer = getClosestPlayerToMouse()
+        aimAtTarget(closestPlayer)
+    end
+end)
+    end
+})
 HacksSection:AddButton({
     Name = "Delete Doors and Gates",
     Callback = function ()
