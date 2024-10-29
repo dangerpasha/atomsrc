@@ -1,9 +1,9 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/dangerpasha/atomsrc/refs/heads/main/source')))();
 
 OrionLib:MakeNotification({
-	Name = "War Tycoon Hack",
-	Content = "Welcome!",
-	Time = 3
+	Name = "atomclient",
+	Content = "Добро пожаловать! АимБот всегда включен, но наводится при затажии колесика Мыши",
+	Time = 9
 });
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage");
@@ -24,6 +24,85 @@ local TeleportsSection = TeleportsTab:AddSection({ Name = "Teleports" });
 local speedHackValue = 40;
 
 local Players = game:GetService("Players")
+    local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CurrentCam = Workspace.CurrentCamera
+local PLAYER = Players.LocalPlayer
+
+-- Настройки для аимбота
+local aimFov = 150 -- Радиус области, где аимбот будет искать противников
+local aimPart = "Head" -- Часть тела, на которую будет происходить прицеливание
+local aimEnabled = false -- Переключатель состояния аимбота
+
+-- Создание круга для отображения FOV
+local fovCircle = Drawing.new("Circle")
+fovCircle.Color = Color3.fromRGB(255, 255, 255) -- Цвет круга (красный)
+fovCircle.Thickness = 1
+fovCircle.NumSides = 50 -- Количество сторон круга
+fovCircle.Transparency = 0.5
+fovCircle.Visible = true -- Круг всегда видимый
+fovCircle.Radius = aimFov -- Радиус круга
+
+-- Функция нахождения ближайшего противника
+local function getClosestPlayerToMouse()
+    local closestPlayer = nil
+    local shortestDistance = aimFov
+
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= PLAYER and player.Team ~= PLAYER.Team then
+            local character = player.Character
+            if character and character:FindFirstChild(aimPart) and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
+                local screenPos, onScreen = CurrentCam:WorldToViewportPoint(character[aimPart].Position)
+                if onScreen then
+                    local mousePos = UIS:GetMouseLocation()
+                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+                    if distance < shortestDistance then
+                        closestPlayer = player
+                        shortestDistance = distance
+                    end
+                end
+            end
+        end
+    end
+    return closestPlayer
+end
+
+-- Функция наведения на выбранную цель
+local function aimAtTarget(target)
+    if target and target.Character then
+        local targetPart = target.Character:FindFirstChild(aimPart)
+        if targetPart then
+            CurrentCam.CFrame = CFrame.new(CurrentCam.CFrame.Position, targetPart.Position)
+        end
+    end
+end
+
+-- Обработчик нажатия колесика мыши
+UIS.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton3 then
+        aimEnabled = true
+    end
+end)
+
+-- Отключение аимбота при отпускании колесика мыши
+UIS.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton3 then
+        aimEnabled = false
+    end
+end)
+
+-- Основной цикл, который обновляет прицеливание и отображение FOV
+RunService.RenderStepped:Connect(function()
+    if aimEnabled then
+        local closestPlayer = getClosestPlayerToMouse()
+        aimAtTarget(closestPlayer)
+    end
+    
+    -- Обновляем позицию круга FOV в зависимости от положения мыши
+    local mousePos = UIS:GetMouseLocation()
+    fovCircle.Position = Vector2.new(mousePos.X, mousePos.Y)
+    fovCircle.Radius = aimFov -- Устанавливаем радиус круга
+end)
 
 local teamColors = {
     ["Alpha"] = Color3.fromRGB(255, 0, 0),
@@ -89,7 +168,7 @@ VisualsSection:AddButton({
     Callback = function()
         enableESP()
     end
-})
+});
 
 HacksSection:AddButton({
     Name = "Delete Doors and Gates",
@@ -247,72 +326,4 @@ while true do
     end;
     playerDropdown:Refresh(playersTable, true);
 end;
-
-local Players = game:GetService("Players")
-local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local CurrentCam = Workspace.CurrentCamera
-local PLAYER = Players.LocalPlayer
-
--- Настройки для аимбота
-local aimFov = 200 -- Радиус области, где аимбот будет искать противников
-local aimPart = "Head" -- Часть тела, на которую будет происходить прицеливание
-local aimEnabled = false -- Переключатель состояния аимбота
-
--- Функция нахождения ближайшего противника
-local function getClosestPlayerToMouse()
-    local closestPlayer = nil
-    local shortestDistance = aimFov
-
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= PLAYER and player.Team ~= PLAYER.Team then
-            local character = player.Character
-            if character and character:FindFirstChild(aimPart) and character:FindFirstChild("Humanoid") and character.Humanoid.Health > 0 then
-                local screenPos, onScreen = CurrentCam:WorldToViewportPoint(character[aimPart].Position)
-                if onScreen then
-                    local mousePos = UIS:GetMouseLocation()
-                    local distance = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-                    if distance < shortestDistance then
-                        closestPlayer = player
-                        shortestDistance = distance
-                    end
-                end
-            end
-        end
-    end
-    return closestPlayer
-end
-
--- Функция наведения на выбранную цель
-local function aimAtTarget(target)
-    if target and target.Character then
-        local targetPart = target.Character:FindFirstChild(aimPart)
-        if targetPart then
-            CurrentCam.CFrame = CFrame.new(CurrentCam.CFrame.Position, targetPart.Position)
-        end
-    end
-end
-
--- Обработчик нажатия колесика мыши
-UIS.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton3 then
-        aimEnabled = true
-    end
-end)
-
--- Отключение аимбота при отпускании колесика мыши
-UIS.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton3 then
-        aimEnabled = false
-    end
-end)
-
--- Основной цикл, который обновляет прицеливание
-RunService.RenderStepped:Connect(function()
-    if aimEnabled then
-        local closestPlayer = getClosestPlayerToMouse()
-        aimAtTarget(closestPlayer)
-    end
-end)
-
 
