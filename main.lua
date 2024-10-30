@@ -125,12 +125,14 @@ local teamColors = {
 
 local function highlightPlayer(player)
     if player.Character then
+        -- Удаляем существующие Highlight и TextLabel объекты
         for _, child in ipairs(player.Character:GetChildren()) do
-            if child:IsA("Highlight") then
+            if child:IsA("Highlight") or child:IsA("BillboardGui") then
                 child:Destroy()
             end
         end
 
+        -- Настройка Highlight
         local team = player.Team
         if team and teamColors[team.Name] then
             local highlight = Instance.new("Highlight")
@@ -138,8 +140,37 @@ local function highlightPlayer(player)
             highlight.FillColor = teamColors[team.Name]
             highlight.OutlineTransparency = 1
         end
+
+        -- Создание текстовой метки для никнейма игрока
+        local nameTag = Instance.new("BillboardGui", player.Character)
+        nameTag.Name = "NameTag"
+        nameTag.Size = UDim2.new(0, 200, 0, 50)
+        nameTag.StudsOffset = Vector3.new(0, 3, 0)
+        nameTag.AlwaysOnTop = true
+
+        local nameLabel = Instance.new("TextLabel", nameTag)
+        nameLabel.Size = UDim2.new(1, 0, 1, 0)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = player.Name
+        nameLabel.TextColor3 = Color3.new(1, 1, 1)
+        nameLabel.TextStrokeTransparency = 0.5
+
+        -- Создание текстовой метки для базы игрока
+        local baseTag = Instance.new("BillboardGui", player.Character)
+        baseTag.Name = "BaseTag"
+        baseTag.Size = UDim2.new(0, 200, 0, 50)
+        baseTag.StudsOffset = Vector3.new(0, 1.5, 0)
+        baseTag.AlwaysOnTop = true
+
+        local baseLabel = Instance.new("TextLabel", baseTag)
+        baseLabel.Size = UDim2.new(1, 0, 1, 0)
+        baseLabel.BackgroundTransparency = 1
+        baseLabel.Text = player.leaderstats and player.leaderstats.Team and player.leaderstats.Team.Value or "No Base"
+        baseLabel.TextColor3 = Color3.new(0.7, 1, 0.7)
+        baseLabel.TextStrokeTransparency = 0.5
     end
 end
+
 
 local function enableESP()
     for _, player in ipairs(Players:GetPlayers()) do
